@@ -9,13 +9,25 @@
 		{
 			"path": "pages/writing/writing",
 			"style": {
-				"navigationBarTitleText": ""
+				"navigationBarTitleText": "涂鸦"
+			}
+		},
+		{
+			"path": "pages/writing/albums",
+			"style": {
+				"navigationBarTitleText": "相册"
 			}
 		},
 		{
 			"path": "pages/color/color",
 			"style": {
 				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/gomoku/gomoku",
+			"style": {
+				"navigationBarTitleText": "五子棋"
 			}
 		}
 	],

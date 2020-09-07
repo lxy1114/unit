@@ -1,9 +1,8 @@
 <template>
 	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
-		<view class="text-area">
-			<text class="title">{{title}}</text>
-		</view>
+		<navigator class="list" v-for="(item,index) in list" :key="index" :url="item.url">
+			{{item.title}}
+		</navigator>
 	</view>
 </template>
 
@@ -11,42 +10,32 @@
 	export default {
 		data() {
 			return {
-				title: 'Hello'
+				list: [{title: '涂鸦',url: '/pages/writing/writing'},
+						{title: '五子棋',url: '/pages/gomoku/gomoku'}]
 			}
-		},
-		onLoad() {
-
 		},
 		methods: {
 
-		}
+		},
+		onLoad() {
+		
+		},
 	}
 </script>
 
 <style>
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.logo {
-		height: 200rpx;
-		width: 200rpx;
-		margin-top: 200rpx;
-		margin-left: auto;
-		margin-right: auto;
-		margin-bottom: 50rpx;
-	}
-
-	.text-area {
-		display: flex;
-		justify-content: center;
-	}
-
-	.title {
-		font-size: 36rpx;
-		color: #8f8f94;
-	}
+.content {
+	padding-top: 150rpx;
+}
+.list{
+	width: 500rpx;
+	height: 80rpx;
+	line-height: 80rpx;
+	border: 2rpx solid #DDDDDD;
+	border-radius: 8rpx;
+	font-size: 28rpx;
+	color: #666666;
+	text-align: center;
+	margin: 0rpx auto 50rpx;
+}
 </style>

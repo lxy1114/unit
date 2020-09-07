@@ -1,5 +1,6 @@
 <template>
 	<view class="container">
+		<navigator class="albums" url="./albums">相册</navigator>
 		<canvas class="canvas" 
 			canvas-id="myCanvas" 
 			disable-scroll="true" 
@@ -12,7 +13,7 @@
 			<view class="but-text" @click="colorShow = !colorShow">{{!colorShow ? '设置' : '隐藏设置'}}</view>
 			<!-- <view class="but-text">历史记录</view> -->
 			<view class="but-text" @click="showAll">全部显示</view>
-			<view class="but-text" @click="toCanvas">生成图片</view>
+			<view class="but-text" @click="toCanvas">{{id ? '保存图片' : '生成图片'}}</view>
 		</view>
 		<view class="color" v-if="colorShow">
 			<view class="title">画笔颜色</view>
@@ -70,7 +71,9 @@ export default {
 			custom: false,
 			list: [],
 			img: '',
-			newColor: ''
+			newColor: '',
+			albumsList: [],
+			id: ''
 		}
 	},
 	methods: {
@@ -185,6 +188,30 @@ export default {
 				canvasId: 'myCanvas',
 				success:(res) => {
 					this.img = res.tempFilePath
+					var id = uni.getStorageSync('canvasId') ? uni.getStorageSync('canvasId') : 1
+					var date = new Date()
+					date = date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds()					
+					var obj = {
+						img: res.tempFilePath,
+						list: this.list,
+						date,
+						id
+					}
+					if(this.id){
+						for(var i in this.albumsList){
+							if(this.albumsList[i].id == this.id){
+								this.albumsList[i] = obj
+							}
+						}
+					}else{
+						this.albumsList.splice(0,0,obj)
+					}				
+					uni.setStorageSync('albumsList',JSON.stringify(this.albumsList))
+					this.$utils.toast(this.id ? '保存成功' : '生成成功，已保存到相册')
+					this.list = []
+					this.clear(true)
+					id ++
+					uni.setStorageSync('canvasId',id)
 				}
 			})
 		},
@@ -196,8 +223,27 @@ export default {
 			this.custom = false
 		},
 	},
+	onLoad(e) {
+		console.log(e)
+		this.list = e.item ? JSON.parse(e.item).list : [],
+		this.id = e.id || ''
+		if(uni.getStorageSync('albumsList')){
+			this.albumsList = JSON.parse(uni.getStorageSync('albumsList'))
+		}
+	},
 	onReady() {
 		this.ctx = uni.createCanvasContext('myCanvas')
+		// setTimeout(() => {
+		// 	wx.createSelectorQuery().select('.canvas').boundingClientRect((res) => {
+		// 		console.log(res,'res')
+		// 		this.ctx.fillStyle = "#007AFF";
+		// 		this.ctx.fillRect(0,0,res.width*2,res.height*2)
+		// 		this.ctx.draw()
+		// 	}).exec()
+		// },100)
+		if(this.list){
+			this.clear()
+		}
 	}
 }
 </script>
@@ -206,7 +252,14 @@ export default {
 .container{
 	width: 690rpx;
 	height: 400rpx;
-	margin: 60rpx auto;
+	margin: 30rpx auto;
+}
+.albums{
+	width: 100%;
+	font-size: 28rpx;
+	color: red;
+	text-align: right;
+	margin-bottom: 20rpx;
 }
 uni-canvas{
 	width: 100%;

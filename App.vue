@@ -19,4 +19,19 @@
   height: 0;
   color: transparent;
 }
+button{
+	border-style: none;
+}
+.mask{
+	width: 100%;
+	height: 100%;
+	background: #000000;
+	opacity: 0.5;
+	position: fixed;
+	top: 0rpx;
+	left: 0rpx;
+}
+.placeholder{
+	font-size: 24rpx;
+}
 </style>
