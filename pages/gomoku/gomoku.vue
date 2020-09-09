@@ -1,9 +1,14 @@
 <template>
 	<view class="container">
-		<view class="list" v-for="(item,index) in list" :key="index">
-			<view class="list-text" v-for="(items,index1) in item.list" :key="index1" @click="check(items,index,index1)">
-				<view class="piece" :style="'background:'+items.color" v-if="items.color"></view>
+		<view>
+			<view class="list" v-for="(item,index) in list" :key="index">
+				<view class="list-text" v-for="(items,index1) in item.list" :key="index1" @click="check(items,index,index1)">
+					<view class="piece" :style="'background:'+items.color" v-if="items.color"></view>
+				</view>
 			</view>
+		</view>
+		<view class="but">
+			<view class="but-text" @click="again">重新开始</view>
 		</view>
 	</view>
 </template>
@@ -120,22 +125,37 @@ export default {
 				var winner = items.color == '#000' ? '黑旗获胜' : '白棋获胜'
 				this.$utils.modal(winner)	
 			}
-		}
+		},
+		getOrigin() {
+			this.list = []
+			//生成10*10棋盘
+			for(var i=0; i<=10; i++){
+				var obj = {
+					list: []
+				}
+				for(var j=0; j<=10; j++){
+					var obj1 = {
+						color: ''
+					}
+					obj.list.push(obj1)
+				}
+				this.list.push(obj)
+			}
+		},
+		again() {
+			uni.showModal({
+				title: '提示',
+				content: '是否重新开始新的棋局？',
+				success:(res) => {
+					if(res.confirm){
+						this.getOrigin()
+					}
+				}
+			})
+		},
 	},
 	onLoad() {
-		//生成10*10棋盘
-		for(var i=0; i<=10; i++){
-			var obj = {
-				list: []
-			}
-			for(var j=0; j<=10; j++){
-				var obj1 = {
-					color: ''
-				}
-				obj.list.push(obj1)
-			}
-			this.list.push(obj)
-		}
+		this.getOrigin()
 	}
 }
 </script>
@@ -193,12 +213,28 @@ export default {
 	height: 50%;
 }
 .piece{
-	width: 20rpx;
-	height: 20rpx;
+	width: 30rpx;
+	height: 30rpx;
 	background: #FFFFFF;
 	border-radius: 100%;
 	position: relative;
 	z-index: 999;
-	box-shadow: 2rpx 2rpx 10rpx #999999;
+	box-shadow: 3rpx 3rpx 15rpx #999999;
+}
+.but{
+	display: flex;
+	justify-content: center;
+	width: 82%;
+	margin: 30rpx auto;
+	&-text{
+		width: 100%;
+		height: 70rpx;
+		line-height: 70rpx;
+		border: 2rpx solid #DDDDDD;
+		border-radius: 4rpx;
+		font-size: 28rpx;
+		color: #666666;
+		text-align: center;
+	}
 }
 </style>

@@ -1,15 +1,11 @@
 <template>
 	<view class="content">
 		<view class="edit" @click="edit = !edit">{{edit ? '完成' : '编辑'}}</view>
-		<view class="imgbox" v-for="(item,index) in list" :key="index">
+		<navigator class="imgbox" v-for="(item,index) in list" :key="index" :url="'./writing?item='+JSON.stringify(item)+'&id='+item.id">
 			<image class="imgbox-img" :src="item.img" mode="widthFix"></image>
 			<view class="imgbox-date">{{item.date}}</view>
-			<!-- <image class="delete" src="../../static/delete.png"></image> -->
-			<!-- <view class="but" v-if="edit">
-				<navigator class="but-text" :url="'./writing?item='+JSON.stringify(item)+'&id='+item.id">修改</navigator>
-				<view class="but-text" @click="getDelete(index)">删除</view>
-			</view> -->
-		</view>
+			<image class="delete" src="../../static/delete.png" mode="widthFix" @click.stop="getDelete(index)" v-if="edit"></image>
+		</navigator>
 	</view>
 </template>
 
@@ -49,7 +45,6 @@ export default {
 				this.imgList.push(this.list[i].img)
 			}
 		}
-		console.log(this.list)
 	}
 }
 </script>
@@ -64,10 +59,11 @@ export default {
 }
 .imgbox{
 	display: inline-block;
-	width: 29%;
+	width: 44%;
 	margin: 20rpx 0rpx 0rpx 25rpx;
 	font-size: 24rpx;
 	color: #666666;
+	position: relative;
 	&-img{
 		width: 100%;
 		height: 200rpx;
@@ -77,6 +73,13 @@ export default {
 	&-date{
 		text-align: right;
 	}
+}
+.delete{
+	width: 40rpx;
+	height: 40rpx;
+	position: absolute;
+	top: 10rpx;
+	right: 10rpx;
 }
 .but{
 	display: flex;

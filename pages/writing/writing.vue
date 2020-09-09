@@ -1,6 +1,8 @@
 <template>
 	<view class="container">
-		<navigator class="albums" url="./albums">相册</navigator>
+		<view class="albums">
+			<navigator class="albums-text" url="./albums">相册</navigator>
+		</view>
 		<canvas class="canvas" 
 			canvas-id="myCanvas" 
 			disable-scroll="true" 
@@ -44,7 +46,7 @@
 				<button class="custombut-text" @click="addColor">添加颜色</button>
 			</view>
 		</view>
-		<view class="history">
+		<view class="history" :style="'height:'+height+'rpx'">
 			<view class="step" v-for="(item,index) in list" :key="index">
 				<view class="step-text">{{'第'+(index+1)+'步'}}</view>
 				<view class="step-but">
@@ -73,48 +75,50 @@ export default {
 			img: '',
 			newColor: '',
 			albumsList: [],
-			id: ''
+			id: '',
+			height: ''
 		}
 	},
 	methods: {
+		//触摸开始
 		touchstart(e) {
 			this.point.push({
 				x: e.changedTouches[0].x,
 				y: e.changedTouches[0].y
 			})
 		},
+		//移动画笔
 		touchmove(e) {
 			this.point.push({
 				x: e.changedTouches[0].x,
 				y: e.changedTouches[0].y
 			})
-			// if(this.point.length > 2){
-				this.draw()
-			// }		
+			this.draw()
 		},
+		//触摸结束
 		touchend() {
 			var obj = {
 				point: this.point,
-				only: false,
-				hide: false
+				only: false,  //仅显示
+				hide: false,  //显示、隐藏
+				color: this.color  //画笔颜色，避免重复绘制时颜色覆盖
 			}
-			this.list.push(obj)
-			this.point = []
+			this.list.push(obj)  //绘画路径放置同一数组，用于历史路径
+			this.point = []   //置空，使画笔断开
 		},
-		draw(start,end,last) {
+		//绘制
+		draw(start,end,last,color) {
 			var point1 = start || this.point[this.point.length-2]
 			var point2 = end || this.point[this.point.length-1]
 			this.ctx.setLineWidth(this.width)
-			if(last){
-				this.ctx.beginPath()
-			}
 			this.ctx.moveTo(point1.x, point1.y)
 			this.ctx.lineTo(point2.x, point2.y)
-			this.ctx.setStrokeStyle(this.color)
+			this.ctx.setStrokeStyle(color || this.color)
 			this.ctx.stroke()
 			
 			this.ctx.draw(true)
 		},
+		//清空（type为true时仅清空画板、false时清空并重新绘制--用于历史路径）
 		clear(type) {
 			wx.createSelectorQuery().select('.canvas').boundingClientRect((res) => {
 			   this.ctx.clearRect(0, 0, res.width*2, res.height*2)
@@ -128,19 +132,18 @@ export default {
 					}
 					for(var j in this.list[i].point){
 					   j = typeof j == 'number' ? j : parseInt(j)
-						var last = j == this.list[i].point.length-1
-						if(!last){
-							this.draw(this.list[i].point[j],this.list[i].point[j+1],last)
-						}					   
+						this.draw(this.list[i].point[j],this.list[i].point[j+1],last,this.list[i].color)			   
 					}
 			   }
 			}).exec()
 		},
+		//改变画笔粗细
 		changeWidth(type) {
 			var width = typeof this.width == 'number' ? this.width : parseInt(this.width)
 			this.width = type == 'reduce' && this.width != 1 ? width-1 : 
 							 type == 'add' ? width+1 : this.width
 		},
+		//控制历史记录的显示、隐藏
 		checkStep(item,type) {
 			if(type == 'only'){
 				for(var i in this.list){
@@ -164,6 +167,7 @@ export default {
 			}
 			this.clear()
 		},
+		//删除历史记录
 		getDelete(index) {
 			uni.showModal({
 				title: '提示',
@@ -176,6 +180,7 @@ export default {
 				}
 			})
 		},
+		//全部显示
 		showAll() {
 			for(var i in this.list){
 				this.list[i].hide = false
@@ -183,6 +188,7 @@ export default {
 			}
 			this.clear()
 		},
+		//生成图片--编辑图片时覆盖原图、否则重新生成图片
 		toCanvas() {
 			uni.canvasToTempFilePath({
 				canvasId: 'myCanvas',
@@ -207,24 +213,34 @@ export default {
 						this.albumsList.splice(0,0,obj)
 					}				
 					uni.setStorageSync('albumsList',JSON.stringify(this.albumsList))
-					this.$utils.toast(this.id ? '保存成功' : '生成成功，已保存到相册')
-					this.list = []
-					this.clear(true)
+					var content = this.id ? '保存成功' : '生成成功，已保存到相册'
+					uni.showModal({
+						title: '提示',
+						content: content+'\n'+'是否开启新画板',
+						success:(res) => {
+							if(res.confirm){
+								this.list = []
+								this.clear(true)
+							}
+						}
+					})
 					id ++
 					uni.setStorageSync('canvasId',id)
 				}
 			})
 		},
+		//取消自定义颜色
 		cancel() {
 			this.custom = false
 		},
+		//添加自定义颜色
 		addColor() {
 			this.colorList.push(this.newColor)
 			this.custom = false
 		},
 	},
 	onLoad(e) {
-		console.log(e)
+		this.height = (uni.getSystemInfoSync().windowHeight-314)*2
 		this.list = e.item ? JSON.parse(e.item).list : [],
 		this.id = e.id || ''
 		if(uni.getStorageSync('albumsList')){
@@ -233,14 +249,6 @@ export default {
 	},
 	onReady() {
 		this.ctx = uni.createCanvasContext('myCanvas')
-		// setTimeout(() => {
-		// 	wx.createSelectorQuery().select('.canvas').boundingClientRect((res) => {
-		// 		console.log(res,'res')
-		// 		this.ctx.fillStyle = "#007AFF";
-		// 		this.ctx.fillRect(0,0,res.width*2,res.height*2)
-		// 		this.ctx.draw()
-		// 	}).exec()
-		// },100)
 		if(this.list){
 			this.clear()
 		}
@@ -260,6 +268,9 @@ export default {
 	color: red;
 	text-align: right;
 	margin-bottom: 20rpx;
+	&-text{
+		display: inline-block;
+	}
 }
 uni-canvas{
 	width: 100%;
@@ -397,5 +408,6 @@ uni-canvas{
 }
 .history{
 	margin-top: 30rpx;
+	overflow-y: scroll;
 }
 </style>
