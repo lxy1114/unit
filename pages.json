@@ -29,6 +29,12 @@
 			"style": {
 				"navigationBarTitleText": "五子棋"
 			}
+		},
+		{
+			"path": "pages/puzzle/puzzle",
+			"style": {
+				"navigationBarTitleText": "拼图"
+			}
 		}
 	],
 	"globalStyle": {

@@ -11,7 +11,8 @@
 		data() {
 			return {
 				list: [{title: '涂鸦',url: '/pages/writing/writing'},
-						{title: '五子棋',url: '/pages/gomoku/gomoku'}]
+						{title: '五子棋',url: '/pages/gomoku/gomoku'},
+						{title: '拼图',url: '/pages/puzzle/puzzle'}]
 			}
 		},
 		methods: {
